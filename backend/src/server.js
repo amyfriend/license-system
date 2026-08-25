@@ -90,6 +90,7 @@ app.post("/api/licenses/verify", (req, res) => {
         });
     }
 
+    // Cek status license
     if (license.status !== "active") {
         return res.status(403).json({
             success: false,
@@ -97,7 +98,11 @@ app.post("/api/licenses/verify", (req, res) => {
         });
     }
 
-    if (new Date() > new Date(license.expires_at)) {
+    // Cek expired
+    const now = new Date();
+    const expires = new Date(license.expires_at);
+
+    if (now >= expires) {
         license.status = "expired";
         saveLicenses(data);
 
@@ -107,8 +112,8 @@ app.post("/api/licenses/verify", (req, res) => {
         });
     }
 
-    // Bind device saat pertama kali digunakan
-    if (license.device_id === null) {
+    // Bind device pertama kali
+    if (!license.device_id) {
         license.device_id = device_id;
         saveLicenses(data);
     }
@@ -121,10 +126,12 @@ app.post("/api/licenses/verify", (req, res) => {
         });
     }
 
-    res.json({
+    // License valid
+    return res.json({
         success: true,
         message: "License valid",
-        expires_at: license.expires_at
+        expires_at: license.expires_at,
+        device_id: license.device_id
     });
 });
 
