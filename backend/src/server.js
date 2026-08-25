@@ -77,35 +77,6 @@ app.post("/api/licenses/verify", (req, res) => {
         });
     }
 
-    const data = loadLicenses();
-
-    const license = data.licenses.find(
-        item => item.key === license_key
-    );
-
-    if (!license) {
-        return res.status(404).json({
-            success: false,
-            message: "License tidak ditemukan"
-        });
-    }
-
-    // Cek status license
-    if (license.status !== "active") {
-        return res.status(403).json({
-            success: false,
-            message: `License ${license.status}`
-        });
-    }
-
-    // Cek expired
-    const now = new Date();
-    const expires = new Date(license.expires_at);
-
-    if (now >= expires) {
-        license.status = "expired";
-        saveLicenses(data);
-
         return res.status(403).json({
             success: false,
             message: "License sudah expired"
